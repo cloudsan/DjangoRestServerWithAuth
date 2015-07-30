@@ -1,8 +1,8 @@
 # Required dependencies
-sudo -H pip3 install python-social-auth
-sudo -H pip3 install djangorestframework
-sudo -H pip3 install django-cors-headers
-
+pip3 install python-social-auth
+pip3 install djangorestframework
+pip3 install django-cors-headers
+pip3 install django-oauth-toolkit python-social-auth
 # RestServerAuth
 Use Django REST Framework, with basic oauth2
 
@@ -28,3 +28,4 @@ cordova build ios
 message_info "Adding plugins..."
 # If using cordova, change to: cordova plugin add
 cordova plugin add https://git-wip-us.apache.org/repos/asf/cordova-plugin-device.git
+
