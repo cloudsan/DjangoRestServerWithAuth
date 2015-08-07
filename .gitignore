@@ -1,4 +1,4 @@
 *.pyc
 scripts.txt
-
 RestServer/db.sqlite3
+client/platforms/*
