@@ -5,7 +5,7 @@ from oauth2_provider.models import AccessToken, Application, RefreshToken
 from django.utils.timezone import now, timedelta
 
 
-def get_token_json(access_token):
+def get_token_json(access_token, user):
     """
     Takes an AccessToken instance as an argument
     and returns a JsonResponse instance from that
@@ -16,7 +16,9 @@ def get_token_json(access_token):
         'expires_in': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
         'token_type': 'Bearer',
         'refresh_token': access_token.refresh_token.token,
-        'scope': access_token.scope
+        'scope': access_token.scope,
+        'user': user.username,
+        'username': user.first_name + ' ' + user.last_name
     }
     return JsonResponse(token)
 
@@ -28,7 +30,7 @@ def get_access_token(user):
     """
 
     # our oauth2 app
-    app = Application.objects.get(name="myapp")
+    app = Application.objects.get(name="Server")
 
     # We delete the old access_token and refresh_token
     try:
@@ -68,4 +70,4 @@ def get_access_token(user):
                access_token=access_token)
 
     # we call get_token_json and returns the access token as json
-    return get_token_json(access_token)
+    return get_token_json(access_token, user)

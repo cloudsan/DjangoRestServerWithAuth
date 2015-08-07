@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+    <script src="./js/hello.js"></script>
+    <!--Register Jquery-->
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+</head>
+
+<body>
+    <script>
+
+
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId: '1007553055921839',
+            cookie: true, // enable cookies to allow the server to access
+            // the session
+            xfbml: true, // parse social plugins on this page
+            version: 'v2.2' // use version 2.2
+        });
+
+    };
+    $(document).ready(function() {
+        $('#facebooklogin').on('click', function() {
+            console.log('click');
+            FB.login(function(response) {
+                if (response.status === 'connected') {
+            // Logged into your app and Facebook.
+            var loginPromise = $.ajax({
+                method: 'POST',
+                url: 'http://cloudsan.com:8080/users/register-by-token/facebook/',
+                data: {
+                    access_token: response.authResponse.accessToken
+                },
+                success: function(data) {
+                    console.log(data);
+                    var loginPromise = {
+                        access_token: data.access_token,
+                        username: data.username
+                    };
+                    window.localStorage.setItem("loginPromise", JSON.stringify(loginPromise));
+                    console.log(loginPromise);
+                    window.location.href = 'http://localhost:8000/'
+                        // console.log(loginPromise);
+                        // window.localStorage.setItem("loginPromise", JSON.stringify(data));
+                        // window.location.reload();
+                }
+            });
+        } else if (response.status === 'not_authorized') {
+            // The person is logged into Facebook, but not your app.
+            document.getElementById('status').innerHTML = 'Please log ' +
+                'into this app.';
+        } else {
+            // The person is not logged into Facebook, so we're not sure if
+            // they are logged into this app or not.
+            document.getElementById('status').innerHTML = 'Please log ' +
+                'into Facebook.';
+        }
+            });
+        })
+
+    });
+    // Load the SDK asynchronously
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    </script>
+    <div id="status">
+    </div>
+    <button id="facebooklogin">facebook</button>
+    <button id="googlelogin">Google</button>
+</body>
+
+</html>
