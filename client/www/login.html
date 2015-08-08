@@ -23,12 +23,35 @@
     <script src="./js/hello.js"></script>
     <!--Register Jquery-->
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <!--Register Google Api-->
+    <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 </head>
 
 <body>
     <script>
-
-
+    function getLoginPromise(backend,token)
+    {
+        var loginPromise = $.ajax({
+                        method: 'POST',
+                        url: 'http://cloudsan.com:8080/users/register-by-token/'+backend+'/',
+                        data: {
+                            access_token: token
+                        },
+                        success: function(data) {
+                            console.log(data);
+                            var loginPromise = {
+                                access_token: data.access_token,
+                                username: data.username
+                            };
+                            window.localStorage.setItem("loginPromise", JSON.stringify(loginPromise));
+                            console.log(loginPromise);
+                            window.location.href = 'http://cloudsan.com:8000/'
+                                // console.log(loginPromise);
+                                // window.localStorage.setItem("loginPromise", JSON.stringify(data));
+                                // window.location.reload();
+                        }
+                    });
+    }
     window.fbAsyncInit = function() {
         FB.init({
             appId: '1007553055921839',
@@ -44,37 +67,18 @@
             console.log('click');
             FB.login(function(response) {
                 if (response.status === 'connected') {
-            // Logged into your app and Facebook.
-            var loginPromise = $.ajax({
-                method: 'POST',
-                url: 'http://cloudsan.com:8080/users/register-by-token/facebook/',
-                data: {
-                    access_token: response.authResponse.accessToken
-                },
-                success: function(data) {
-                    console.log(data);
-                    var loginPromise = {
-                        access_token: data.access_token,
-                        username: data.username
-                    };
-                    window.localStorage.setItem("loginPromise", JSON.stringify(loginPromise));
-                    console.log(loginPromise);
-                    window.location.href = 'http://localhost:8000/'
-                        // console.log(loginPromise);
-                        // window.localStorage.setItem("loginPromise", JSON.stringify(data));
-                        // window.location.reload();
+                    // Logged into your app and Facebook.
+                    getLoginPromise('facebook',response.authResponse.accessToken)
+                } else if (response.status === 'not_authorized') {
+                    // The person is logged into Facebook, but not your app.
+                    document.getElementById('status').innerHTML = 'Please log ' +
+                        'into this app.';
+                } else {
+                    // The person is not logged into Facebook, so we're not sure if
+                    // they are logged into this app or not.
+                    document.getElementById('status').innerHTML = 'Please log ' +
+                        'into Facebook.';
                 }
-            });
-        } else if (response.status === 'not_authorized') {
-            // The person is logged into Facebook, but not your app.
-            document.getElementById('status').innerHTML = 'Please log ' +
-                'into this app.';
-        } else {
-            // The person is not logged into Facebook, so we're not sure if
-            // they are logged into this app or not.
-            document.getElementById('status').innerHTML = 'Please log ' +
-                'into Facebook.';
-        }
             });
         })
 
@@ -88,6 +92,60 @@
         js.src = "//connect.facebook.net/en_US/sdk.js";
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
+
+    var clientId = '778441955812-psqgs75ahamg1crfpg83uu1u327qat23.apps.googleusercontent.com';
+    var apiKey = 'AIzaSyAJq5rFqdW5czH97CEkQy4xtOuUR8V3ZCs';
+    var scopes = 'https://www.googleapis.com/auth/userinfo.email';
+
+
+    // Our first function is used to set the api key and
+    // is run once the google api is loaded in the page header.
+    function handleClientLoad() {
+        gapi.client.setApiKey(apiKey);
+    }
+
+    //Gets the result after the authorization and if successful,
+    //it makes the api call to get the  //user's information.
+    function handleAuthResult(authResult) {
+
+        if (authResult && !authResult.error) {
+            console.log(authResult);
+            getLoginPromise('google-plus',authResult.access_token);
+            // makeApiCall();
+        }
+    }
+
+    //Make api call on button click to authorize client
+    function handleAuthClick(event) {
+        gapi.auth.authorize({
+            client_id: clientId,
+            scope: scopes,
+            immediate: false
+        }, handleAuthResult);
+
+        return false;
+    }
+
+    // Load the API and make an API call.  Display the results on the screen.
+    function makeApiCall() {
+        // gapi.client.load('plus', 'v1', function() {
+        //     var request = gapi.client.plus.people.get({
+        //         'userId': 'me'
+        //     });
+
+        //     request.execute(function(resp) {
+        //         //Do Stuff
+        //         //You have access to user id, name, display name, gender, emails, etc.
+        //         //For more info visit https://developers.google.com/+/api/latest/people#resource
+
+        //     });
+        // });
+    }
+
+    $(function() {
+        var authorizeButton = document.getElementById('googlelogin');
+        authorizeButton.onclick = handleAuthClick;
+    })
     </script>
     <div id="status">
     </div>
